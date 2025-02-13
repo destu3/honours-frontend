@@ -13,16 +13,24 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Outlet, Link } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+import { Fade } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './store/store.ts';
+import { hideAlert } from './store/slices/alertSlice.ts';
 
 const drawerWidth = 240;
 const navItems = ['Register', 'Login', 'About'];
 
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const handleDrawerToggle = () => {
     setMobileOpen(prevState => !prevState);
   };
+
+  // Access global alert state
+  const alertState = useSelector((state: RootState) => state.alert);
+  const dispatch = useDispatch();
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
@@ -90,6 +98,22 @@ export default function App() {
       </nav>
       <Box component="main" width={'100%'} sx={{ p: 3 }}>
         <Toolbar />
+        {/* Global Alert (renders only if alertState.visible is true) */}
+        <Fade timeout={150} in={alertState.visible}>
+          <Alert
+            severity={alertState.severity}
+            onClose={() => dispatch(hideAlert())}
+            sx={{
+              position: 'fixed',
+              top: 20,
+              left: 20,
+              zIndex: 1300,
+              minWidth: 250,
+            }}
+          >
+            {alertState.message}
+          </Alert>
+        </Fade>
         <Outlet />
       </Box>
     </Box>
