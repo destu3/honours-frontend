@@ -5,51 +5,50 @@ import { useDispatch } from 'react-redux';
 import supabase from '../../services/supabase/supabase';
 import { showAlert } from '../../store/slices/alertSlice';
 
-const Register = () => {
-  const [formData, setFormData] = useState({ email: '', password: '', name: '' });
+const Login = () => {
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const dispatch = useDispatch();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignUp = async () => {
-    const { email, password, name } = formData;
+  const handleSignIn = async () => {
+    const { email, password } = formData;
 
-    // Validate fields
-    if (!email || !password || !name) {
-      dispatch(showAlert({ message: 'Please fill in all fields.', severity: 'warning' }));
+    // Check if fields are filled
+    if (!email || !password) {
+      dispatch(showAlert({ message: 'Please enter both email and password.', severity: 'warning' }));
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: { data: { full_name: name } },
     });
 
     if (error) {
       dispatch(showAlert({ message: error.message, severity: 'error' }));
-      console.error('Error during sign-up:', error);
+      console.error('Error during sign-in:', error);
       return;
     }
 
-    dispatch(showAlert({ message: 'Sign-up successful! Please check your email for verification.', severity: 'success' }));
-    console.log('Sign-up successful:', data);
+    dispatch(showAlert({ message: 'Sign in successful!', severity: 'success' }));
+    console.log('Sign-in successful:', data);
   };
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleSignIn = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
     });
 
     if (error) {
       dispatch(showAlert({ message: error.message, severity: 'error' }));
-      console.error('Error during Google sign-up:', error);
+      console.error('Error during Google sign-in:', error);
       return;
     }
 
-    dispatch(showAlert({ message: 'Google sign-up successful!', severity: 'success' }));
+    dispatch(showAlert({ message: 'Google sign in successful!', severity: 'success' }));
     console.log('Google sign-in successful:', data);
   };
 
@@ -57,14 +56,14 @@ const Register = () => {
     <Container maxWidth="xs">
       <Typography
         sx={{ color: 'primary.main' }}
-        width={'fit-content'}
         fontFamily={'Montserrat'}
         variant="h4"
         fontWeight={600}
+        width={'fit-content'}
         mx={'auto'}
         mb={3}
       >
-        Create an account
+        Sign in
       </Typography>
 
       <Box component="form" width="100%" display="flex" flexDirection="column" gap={2}>
@@ -78,10 +77,9 @@ const Register = () => {
           required
           onChange={handleChange}
         />
-        <TextField name="name" label="Full name" variant="outlined" fullWidth required onChange={handleChange} />
 
-        <Button variant="contained" color="primary" fullWidth size="large" onClick={handleSignUp}>
-          Sign up
+        <Button variant="contained" color="primary" fullWidth size="large" onClick={handleSignIn}>
+          Sign In
         </Button>
       </Box>
 
@@ -91,12 +89,12 @@ const Register = () => {
         size="large"
         startIcon={<Google />}
         sx={{ mt: '1rem', textTransform: 'none', bgcolor: '#f1f1f1' }}
-        onClick={handleGoogleSignUp}
+        onClick={handleGoogleSignIn}
       >
-        {'Sign up with Google'.toUpperCase()}
+        {'Sign in with Google'.toUpperCase()}
       </Button>
     </Container>
   );
 };
 
-export default Register;
+export default Login;
