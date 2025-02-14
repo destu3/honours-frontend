@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { signUp } from '../user/userService';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -53,35 +52,6 @@ export const scheduleTokenRefresh = async () => {
   }, delay);
 };
 
-export const isFirstGoogleSignIn = async () => {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    console.error('Error fetching user:', userError);
-    return false;
-  }
-
-  // Step 3: Find the Google identity in the user's identities array
-  const googleIdentity = user.identities?.find(identity => identity.provider === 'google');
-
-  if (!googleIdentity) {
-    console.log('No Google identity found for this user.');
-    return false;
-  }
-
-  console.log('Google identity found:', googleIdentity);
-
-  // Step 4: Check if the Google identity was created within the last 1 minute
-  const identityCreatedAt = new Date(googleIdentity.created_at as string).getTime();
-  const now = Date.now();
-  const isFirstTime = now - identityCreatedAt < 60000; // 1 minute threshold
-
-  return isFirstTime;
-};
-
 export const checkSessionOnStartup = async () => {
   const { data, error } = await supabase.auth.getSession();
 
@@ -91,23 +61,7 @@ export const checkSessionOnStartup = async () => {
   }
   console.log('User session found:', data.session);
 
-  const firstSignIn = await isFirstGoogleSignIn(); // Check if the user signed in with Google for the first time
-
-  if (firstSignIn) {
-    const { user_metadata } = data.session.user;
-    console.log('First Google sign-in detected. Proceeding with sign-up...');
-    try {
-      const data = await signUp(user_metadata.email, user_metadata.full_name, '', true);
-      console.log('Sign-up successful:', data);
-    } catch (error) {
-      console.error('Error during sign-up:', error);
-      return;
-    }
-  } else {
-    console.log('Not first google sign-in');
-  }
-
-  scheduleTokenRefresh(); // Resume token refresh
+  scheduleTokenRefresh();
 };
 
 window.addEventListener('load', checkSessionOnStartup);

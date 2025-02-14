@@ -1,8 +1,8 @@
 import { useState, ChangeEvent } from 'react';
 import { TextField, Button, Typography, Box, Container } from '@mui/material';
 import { Google } from '@mui/icons-material';
-import { signUp } from '../../services/user/userService';
 import supabase from '../../services/supabase/supabase';
+
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', password: '', name: '' });
 
@@ -11,12 +11,19 @@ const Register = () => {
   };
 
   const handleSignUp = async () => {
-    try {
-      const data = await signUp(formData.email, formData.name, formData.password);
-      console.log('Sign-up successful:', data);
-    } catch (error) {
-      console.error(error);
+    const { password, email, name } = formData;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name } },
+    });
+
+    if (error) {
+      console.error('Error during sign-up:', error);
+      return;
     }
+
+    console.log('Sign-up successful:', data);
   };
 
   const handleGoogleSignUp = async () => {
@@ -25,7 +32,7 @@ const Register = () => {
     });
 
     if (error) {
-      console.error('Error during Google sign-in:', error);
+      console.error('Error during Google sign-up:', error);
       return;
     }
 
