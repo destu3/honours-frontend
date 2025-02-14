@@ -24,9 +24,11 @@ const alertSlice = createSlice({
       state.severity = action.payload.severity || 'info';
     },
     hideAlert(state) {
+      const previousSeverity = state.severity;
+      const previousMessage = state.message;
       state.visible = false;
-      state.message = '';
-      state.severity = 'info';
+      state.message = previousMessage;
+      state.severity = previousSeverity;
     },
   },
 });
