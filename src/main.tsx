@@ -7,7 +7,7 @@ import theme from './mui.config.ts';
 import App from './App.tsx';
 import Home from './pages/Home.tsx';
 import Register from './pages/register/Register.tsx';
-import Login from './pages/login/login.tsx';
+import Login from './pages/login/Login.tsx';
 import './index.css';
 import './services/supabase/supabase.ts';
 import store from './store/store.ts';
