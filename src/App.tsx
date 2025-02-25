@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -18,39 +18,106 @@ import { Fade } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store.ts';
 import { hideAlert } from './store/slices/alertSlice.ts';
+import supabase from './services/supabase/supabase.ts';
+import { Session } from '@supabase/supabase-js';
 
 const drawerWidth = 240;
 const navItems = ['Register', 'Login', 'About'];
 
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+
   const handleDrawerToggle = () => {
     setMobileOpen(prevState => !prevState);
   };
 
-  // Access global alert state
   const alertState = useSelector((state: RootState) => state.alert);
   const dispatch = useDispatch();
 
+  // Check auth status using the Supabase client
+  useEffect(() => {
+    // Get the initial session
+    const getSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error getting session:', error.message);
+      } else {
+        setSession(data.session);
+      }
+    };
+
+    getSession();
+
+    // Listen for changes in auth state
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setSession(session);
+    });
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  const user = session?.user;
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error.message);
+    }
+    location.href = '/';
+  };
+
+  // Mobile drawer content
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        MUI
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          Financia
+        </Link>
       </Typography>
       <Divider />
-      <List>
-        {navItems.map(item => (
-          <ListItem key={item} disablePadding>
+      {user ? (
+        <List>
+          <ListItem disablePadding>
             <ListItemButton sx={{ textAlign: 'center' }}>
-              <ListItemText primary={item} />
+              <ListItemText primary={user.user_metadata.full_name} />
             </ListItemButton>
           </ListItem>
-        ))}
-      </List>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                textAlign: 'center',
+                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.1)' },
+              }}
+            >
+              <ListItemText primary="Logout" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      ) : (
+        <List>
+          {navItems.map(item => (
+            <ListItem key={item} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={`/${item.toLowerCase()}`}
+                sx={{
+                  textAlign: 'center',
+                  '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.1)' },
+                }}
+              >
+                <ListItemText primary={item} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      )}
     </Box>
   );
-
-  // const container = window !== undefined ? () => window.document.body : undefined;
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -66,27 +133,46 @@ export default function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
-            MUI
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Financia
+            </Link>
           </Typography>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-            {navItems.map(item => (
-              <Button key={item}>
-                <Link style={{ color: '#fff', textDecoration: 'none' }} key={item} to={`/${item.toLowerCase()}`}>
+            {user ? (
+              <>
+                <Typography variant="body1" component="span" sx={{ mr: 2, position: 'relative', top: '1.5px' }}>
+                  {user.user_metadata.full_name}
+                </Typography>
+                <Button color="inherit" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              navItems.map(item => (
+                <Button
+                  key={item}
+                  component={Link}
+                  to={`/${item.toLowerCase()}`}
+                  sx={{
+                    color: '#fff',
+                    textDecoration: 'none',
+                    '&:hover': { color: 'lightblue' },
+                  }}
+                >
                   {item}
-                </Link>
-              </Button>
-            ))}
+                </Button>
+              ))
+            )}
           </Box>
         </Toolbar>
       </AppBar>
       <nav>
         <Drawer
-          // container={container}
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
@@ -96,9 +182,8 @@ export default function App() {
           {drawer}
         </Drawer>
       </nav>
-      <Box component="main" width={'100%'} sx={{ p: 3 }}>
+      <Box component="main" sx={{ p: 3 }} width="100%">
         <Toolbar />
-        {/* Global Alert (renders only if alertState.visible is true) */}
         <Fade timeout={150} in={alertState.visible}>
           <Alert
             severity={alertState.severity}

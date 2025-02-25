@@ -51,6 +51,7 @@ const Register = () => {
 
     dispatch(showAlert({ message: 'Google sign-up successful!', severity: 'success' }));
     console.log('Google sign-in successful:', data);
+    location.href = '/';
   };
 
   return (
