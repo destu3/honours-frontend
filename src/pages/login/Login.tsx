@@ -35,6 +35,7 @@ const Login = () => {
 
     dispatch(showAlert({ message: 'Sign in successful!', severity: 'success' }));
     console.log('Sign-in successful:', data);
+    location.href = '/';
   };
 
   const handleGoogleSignIn = async () => {
