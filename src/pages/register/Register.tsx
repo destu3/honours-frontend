@@ -34,8 +34,12 @@ const Register = () => {
       return;
     }
 
-    dispatch(showAlert({ message: 'Sign-up successful! Please check your email for verification.', severity: 'success' }));
+    dispatch(showAlert({ message: 'Sign-up successful!', severity: 'success' }));
     console.log('Sign-up successful:', data);
+
+    setTimeout(() => {
+      location.href = '/profile-select';
+    }, 2000);
   };
 
   const handleGoogleSignUp = async () => {
@@ -51,7 +55,6 @@ const Register = () => {
 
     dispatch(showAlert({ message: 'Google sign-up successful!', severity: 'success' }));
     console.log('Google sign-in successful:', data);
-    location.href = '/';
   };
 
   return (
