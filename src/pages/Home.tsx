@@ -2,7 +2,6 @@ import { Container, Box, Typography, Button } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import { AccountBalanceWallet, ShowChart, Savings, CheckCircle, Security, TipsAndUpdates } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
-import React from 'react';
 
 interface FeatureItem {
   icon: React.ReactNode;

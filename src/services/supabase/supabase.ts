@@ -52,14 +52,64 @@ export const scheduleTokenRefresh = async () => {
   }, delay);
 };
 
+const isFirstGoogleSignIn = async () => {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error('Error fetching user:', userError);
+    return false;
+  }
+
+  // Step 3: Find the Google identity in the user's identities array
+  const googleIdentity = user.identities?.find(identity => identity.provider === 'google');
+
+  if (!googleIdentity) {
+    console.log('No Google identity found for this user.');
+    return false;
+  }
+
+  console.log('Google identity found:', googleIdentity);
+
+  // Step 4: Check if the Google identity was created within the last 30 seconds
+  const identityCreatedAt = new Date(googleIdentity.created_at as string).getTime();
+  const now = Date.now();
+  const isFirstTime = now - identityCreatedAt < 30000; // 30 second threshold
+
+  return isFirstTime;
+};
+
 export const checkSessionOnStartup = async () => {
   const { data, error } = await supabase.auth.getSession();
+  const session = data?.session;
 
   if (error || !data.session) {
     console.log('No active session');
     return;
   }
-  console.log('User session found:', data.session);
+  console.log('User session found:', session);
+
+  const isFirstSignIn = await isFirstGoogleSignIn();
+
+  const hasFinancialProfile = async () => {
+    const { data, error } = await supabase.from('user_financial_profiles').select().eq('user_id', session?.user.id);
+    if (error) {
+      console.error('Error fetching financial profile:', error);
+      return false;
+    }
+    return data.length > 0;
+  };
+
+  if (isFirstSignIn) {
+    if (await hasFinancialProfile()) {
+      console.log('User has already completed the onboarding process');
+      return;
+    }
+    if (!location.href.includes('/profile-select')) location.href = '/profile-select';
+    return;
+  }
 
   scheduleTokenRefresh();
 };
