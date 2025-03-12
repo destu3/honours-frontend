@@ -87,6 +87,11 @@ export default function App() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
+            <ListItemButton component={Link} to="/transactions" sx={{ textAlign: 'center' }}>
+              <ListItemText primary="Transactions" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton
               onClick={handleLogout}
               sx={{
@@ -143,6 +148,17 @@ export default function App() {
                 <Typography variant="body1" component="span" sx={{ mr: 2, position: 'relative', top: '1.5px' }}>
                   {user.user_metadata.full_name}
                 </Typography>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/transactions"
+                  sx={{
+                    textDecoration: 'none',
+                    '&:hover': { color: 'lightblue' },
+                  }}
+                >
+                  Transactions
+                </Button>
                 <Button color="inherit" onClick={handleLogout}>
                   Logout
                 </Button>
