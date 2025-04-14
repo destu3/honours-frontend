@@ -92,6 +92,11 @@ export default function App() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
+            <ListItemButton component={Link} to="/goals" sx={{ textAlign: 'center' }}>
+              <ListItemText primary="Goals" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
             <ListItemButton
               onClick={handleLogout}
               sx={{
@@ -159,6 +164,17 @@ export default function App() {
                 >
                   Transactions
                 </Button>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/goals"
+                  sx={{
+                    textDecoration: 'none',
+                    '&:hover': { color: 'lightblue' },
+                  }}
+                >
+                  Goals
+                </Button>
                 <Button color="inherit" onClick={handleLogout}>
                   Logout
                 </Button>
@@ -210,6 +226,7 @@ export default function App() {
               left: 20,
               zIndex: 1300,
               minWidth: 250,
+              maxWidth: 600,
             }}
           >
             {alertState.message}

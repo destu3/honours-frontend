@@ -9,7 +9,8 @@ import Home from './pages/Home.tsx';
 import Register from './pages/register/Register.tsx';
 import Login from './pages/login/Login.tsx';
 import ProfileSelection from './pages/profile-selection/ProfileSelection.tsx';
-import Transactions from './pages/transaction/Transactions.tsx';
+import Transactions from './pages/transactions/Transactions.tsx';
+import Goals from './pages/goals/Goals.tsx';
 import './index.css';
 import './services/supabase/supabase.ts';
 import store from './store/store.ts';
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="login" element={<Login />} />
               <Route path="profile-select" element={<ProfileSelection />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="goals" element={<Goals />} />
             </Route>
           </Routes>
         </BrowserRouter>
